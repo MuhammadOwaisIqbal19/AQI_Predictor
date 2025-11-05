@@ -37,6 +37,12 @@ jobs:
           LAT: ${{ secrets.LAT }}
           LON: ${{ secrets.LON }}
         run: |
+          echo "Force reinstalling python-dotenv..."
+          pip install --no-cache-dir --upgrade python-dotenv
+          echo "Verifying installation..."
+          python -m pip show python-dotenv
+          echo "✅ python-dotenv is ready, running script..."
+          python src/features/fetch_raw_data.py
           python src/features/fetch_raw_data.py
 
       - name: 🔧 Process and Engineer Features
