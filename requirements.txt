@@ -2,7 +2,7 @@
 pandas
 numpy
 scikit-learn
-# xgboost
+xgboost==2.0.3
 joblib
 
 # API and web framework
@@ -14,8 +14,9 @@ streamlit
 plotly
 
 # Hopsworks + feature store
-hopsworks
-hsfs
+hopsworks==4.2.2
+hsfs==4.2.2
+confluent-kafka
 
 # For fetching and caching Open-Meteo data
 openmeteo-requests
@@ -24,8 +25,3 @@ retry-requests
 
 # Utility
 python-dotenv
-
-xgboost==2.0.3
-hopsworks[python]==4.2.*
-confluent-kafka
-hsfs==4.2.*
