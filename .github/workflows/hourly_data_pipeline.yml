@@ -19,7 +19,10 @@ jobs:
 
       - name: ⚙️ Install Dependencies
         run: |
-          pip install -r requirements.txt || pip install pandas numpy hopsworks openmeteo-requests requests-cache retry-requests xgboost scikit-learn joblib
+          pip install --upgrade pip
+          pip install confluent-kafka
+          pip install "hopsworks[python]==4.2.*"
+          pip install pandas numpy openmeteo-requests requests-cache retry-requests xgboost==2.0.3 scikit-learn joblib
           
 
       - name: 🌍 Run Data Fetching Script
