@@ -20,7 +20,12 @@ jobs:
       - name: ⚙️ Install Dependencies
         run: |
           pip install --upgrade pip
-          pip install --no-cache-dir -r requirements.txt
+          echo "Checking if requirements.txt exists:"
+          ls -l
+          echo "Installing dependencies..."
+          pip install --no-cache-dir -r requirements.txt || exit 1
+          echo "✅ Installed packages:"
+          pip list
 
       - name: 🌍 Run Data Fetching Script
         env:
