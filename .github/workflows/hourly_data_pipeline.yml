@@ -29,7 +29,6 @@ jobs:
           pip install --upgrade pip
 
           echo "Installing dependencies..."
-          pip install hopsworks[python]==4.2.2 hsfs==4.2.2 confluent-kafka python-dotenv
           pip install --no-cache-dir -r requirements.txt
 
           echo "Force reinstalling dotenv..."
