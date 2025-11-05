@@ -14,7 +14,7 @@ streamlit
 plotly
 
 # Hopsworks + feature store
-hopsworks==4.2.2
+hopsworks==4.1.4
 hsfs==3.7.2
 confluent-kafka
 
