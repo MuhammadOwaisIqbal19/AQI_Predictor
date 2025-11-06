@@ -105,6 +105,17 @@ processed_fg = fs.get_or_create_feature_group(
     primary_key=["timestamp"],
     description="Processed and engineered hourly features with AQI target"
 )
+# Ensure correct dtypes before insert
+for col in ["season_spring", "season_summer", "season_winter"]:
+    if col in final_df.columns:
+        final_df[col] = final_df[col].astype(int)
+
+# Optional: also make sure your AQI column name matches lowercase
+if "AQI" in final_df.columns:
+    final_df.rename(columns={"AQI": "aqi"}, inplace=True)
+
+processed_fg.insert(final_df, write_options={"wait_for_job": False})
+
 processed_fg.insert(final_df, write_options={"wait_for_job": False})
 print("✅ Processed data inserted to Hopsworks Feature Group!")
 
