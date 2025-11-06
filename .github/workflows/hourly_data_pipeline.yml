@@ -19,7 +19,7 @@ jobs:
 
       - name: ⚙️ Install Dependencies
         run: |
-          pip install -r requirements.txt || pip install pandas numpy hopsworks openmeteo-requests requests-cache retry-requests scikit-learn joblib
+          pip install -r requirements.txt || pip install pandas numpy "hopsworks[python]" openmeteo-requests requests-cache retry-requests scikit-learn joblib
 
       - name: 🌍 Run Data Fetching Script
         env:
