@@ -16,7 +16,7 @@ plotly
 
 
 # Hopsworks + feature store
-# hopsworks[python]==4.2.*
+hopsworks[python]==4.2.*
 
 
 # For fetching and caching Open-Meteo data
