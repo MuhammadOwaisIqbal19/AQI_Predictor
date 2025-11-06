@@ -15,8 +15,10 @@ streamlit
 plotly
 
 # Hopsworks + feature store
-hopsworks
-hsfs
+# hopsworks
+# hsfs
+hopsworks==4.2.*
+confluent-kafka
 
 # For fetching and caching Open-Meteo data
 openmeteo-requests
@@ -27,4 +29,3 @@ retry-requests
 python-dotenv
 
 
-confluent-kafka
