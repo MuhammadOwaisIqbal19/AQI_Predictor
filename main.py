@@ -55,7 +55,7 @@ def inspect_fg(name, version=1):
 inspect_fg("aqi_raw_weather_pollution")
 inspect_fg("aqi_hourly_features", version=2)
 
-print("Total rows:", len(raw_df))
+# print("Total rows:", len(raw_df))
 print("Unique timestamps:", raw_df['timestamp'].nunique())
 
 # Below will print structure of project

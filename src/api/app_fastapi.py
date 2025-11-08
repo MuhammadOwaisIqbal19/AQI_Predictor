@@ -343,25 +343,95 @@ best_model_name = None
 best_model_type = None
 best_r2 = -999
 
+# for name in model_names:
+#     try:
+#         models = mr.get_models(name=name)
+#         for m in models:
+#             if m.metrics and "r2" in m.metrics:
+#                 if m.metrics["r2"] > best_r2:
+#                     best_r2 = m.metrics["r2"]
+#                     best_model_meta = m
+#                     best_model_name = name
+#                     best_model_type = (
+#                         "lstm" if "lstm" in name else
+#                         "ridge" if "ridge" in name else
+#                         "xgb"
+#                     )
+#     except Exception as e:
+#         print(f"⚠️ Could not read model {name}: {e}")
+
+# if best_model_meta is None:
+#     raise ValueError("❌ No model with R² found in Hopsworks Model Registry!")
+
+# another version
+# for name in model_names:
+#     try:
+#         # Get the latest version of the model
+#         m = mr.get_model(name, version=None)  # latest version
+#         metrics = getattr(m, "metrics", None)
+        
+#         if metrics and "r2" in metrics:
+#             r2 = metrics["r2"]
+#             if r2 > best_r2:
+#                 best_r2 = r2
+#                 best_model_meta = m
+#                 best_model_name = name
+#                 best_model_type = (
+#                     "lstm" if "lstm" in name else
+#                     "ridge" if "ridge" in name else
+#                     "xgb"
+#                 )
+#     except Exception as e:
+#         print(f"⚠️ Could not read model {name}: {e}")
+
+# if best_model_meta is None:
+#     raise ValueError("❌ No model with R² found among latest versions of the 3 models!")
+
 for name in model_names:
     try:
-        models = mr.get_models(name=name)
-        for m in models:
-            if m.metrics and "r2" in m.metrics:
-                if m.metrics["r2"] > best_r2:
-                    best_r2 = m.metrics["r2"]
-                    best_model_meta = m
-                    best_model_name = name
-                    best_model_type = (
-                        "lstm" if "lstm" in name else
-                        "ridge" if "ridge" in name else
-                        "xgb"
-                    )
+        # Get model entry
+        model_entry = mr.get_model(name, version=None)  # latest version entry
+        version_number = model_entry.version           # latest version number
+        
+        # Fetch version object (metrics are here)
+        model_version = mr.get_model(name, version=version_number)
+        metrics = getattr(model_version, "training_metrics", None)
+        # Sometimes your metrics dict uses 'r2' or 'test_r2', check both
+        r2_value = None
+        if metrics:
+            if "r2" in metrics:
+                r2_value = metrics["r2"]
+            elif "test_r2" in metrics:
+                r2_value = metrics["test_r2"]    
+        if r2_value is not None:  
+             if r2_value > best_r2:
+                best_r2 = r2_value
+                best_model_meta = model_version
+                best_model_name = name
+                best_model_type = (
+                    "lstm" if "lstm" in name else
+                    "ridge" if "ridge" in name else
+                    "xgb"
+                )      
+        
+        # if metrics and "r2" in metrics:
+        #     r2 = metrics["r2"]
+        #     if r2 > best_r2:
+        #         best_r2 = r2
+        #         best_model_meta = model_version
+        #         best_model_name = name
+        #         best_model_type = (
+        #             "lstm" if "lstm" in name else
+        #             "ridge" if "ridge" in name else
+        #             "xgb"
+        #         )
+        else:
+             print(f"⚠️ Model {name} v{version_number} has no R² metric")
     except Exception as e:
         print(f"⚠️ Could not read model {name}: {e}")
 
 if best_model_meta is None:
-    raise ValueError("❌ No model with R² found in Hopsworks Model Registry!")
+    raise ValueError("❌ No model with R² found among latest versions of the 3 models!")
 
 print(f"✅ Best model selected: {best_model_name} (v{best_model_meta.version}, R²={best_r2:.3f})")
 
@@ -378,8 +448,50 @@ model_dir = best_model_meta.download()
 #         'hour_sin', 'hour_cos',
 #         'dow_0', 'dow_1', 'dow_2', 'dow_3', 'dow_4', 'dow_5', 'dow_6'
 #     ]
+# import os
+# if best_model_type == "lstm":
+#     model = load_model(os.path.join(model_dir, "lstm_model.h5"))
+#     features = [
+#         'pm10', 'pm2_5', 'ozone', 'nitrogen_dioxide',
+#         'season_spring', 'season_summer', 'season_winter',
+#         'hour_sin', 'hour_cos',
+#         'dow_0', 'dow_1', 'dow_2', 'dow_3', 'dow_4', 'dow_5', 'dow_6'
+#     ]
+# else:
+#     # bundle = joblib.load(
+#     #     os.path.join(model_dir, f"{best_model_type}_model.pkl")
+#     # )
+#     # model = bundle["model"]
+#     # features = bundle["features"]
+#     # Download model
+#     model_dir = best_model_meta.download()  # returns local folder path
+#     print("Files in model_dir:", os.listdir(model_dir))
+#     best_model_file=os.path.join(model_dir, f"{best_model_type}_model.pkl")
+#     bundle = joblib.load(best_model_file)
+#     model = bundle["model"]
+#     features = bundle["features"]
+
+
+
+# print("✅ Model loaded successfully!")
+
+import os
+import glob
+import joblib
+from tensorflow.keras.models import load_model
+
+# Download best model from Hopsworks
+model_dir = best_model_meta.download()
+print("Files in model_dir:", os.listdir(model_dir))
+
+# Determine model type and load accordingly
 if best_model_type == "lstm":
-    model = load_model(os.path.join(model_dir, "lstm_model.h5"))
+    # LSTM is a Keras model (.h5)
+    model_file = os.path.join(model_dir, "lstm_model.h5")
+    if not os.path.exists(model_file):
+        raise FileNotFoundError(f"LSTM model file not found: {model_file}")
+    model = load_model(model_file)
+    # LSTM features (already defined in your code)
     features = [
         'pm10', 'pm2_5', 'ozone', 'nitrogen_dioxide',
         'season_spring', 'season_summer', 'season_winter',
@@ -387,13 +499,21 @@ if best_model_type == "lstm":
         'dow_0', 'dow_1', 'dow_2', 'dow_3', 'dow_4', 'dow_5', 'dow_6'
     ]
 else:
-    bundle = joblib.load(
-        os.path.join(model_dir, f"{best_model_type}_model.pkl")
-    )
+    # XGBoost or Ridge (.pkl)
+    pkl_file = os.path.join(model_dir, f"{best_model_type}_model.pkl")
+    if not os.path.exists(pkl_file):
+        # fallback: find any .pkl file
+        pkl_files = glob.glob(os.path.join(model_dir, "*.pkl"))
+        if not pkl_files:
+            raise FileNotFoundError(f"No .pkl file found in {model_dir}")
+        pkl_file = pkl_files[0]
+
+    bundle = joblib.load(pkl_file)
     model = bundle["model"]
     features = bundle["features"]
 
-print("✅ Model loaded successfully!")
+print(f"✅ Loaded {best_model_type.upper()} model successfully!")
+
 
 # ==============================================================
 # 5️⃣ Define Input Schema

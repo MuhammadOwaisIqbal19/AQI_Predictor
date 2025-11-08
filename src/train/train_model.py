@@ -433,47 +433,104 @@ input_schema = schema.Schema(X_train)
 output_schema = schema.Schema(y_train)
 model_schema = ModelSchema(input_schema=input_schema, output_schema=output_schema)
 
-# --- Log XGBoost ---
+# # --- Log XGBoost ---
+# xgb_meta = mr.python.create_model(
+#     name="xgb_aqi_model",
+#     description="XGBoost AQI model with time-series CV and early stopping",
+#     metrics=metrics_xgb,
+#     model_schema=model_schema,
+# )
+# xgb_meta.save("artifacts/xgb_model.pkl")
+# print(f"✅ XGBoost logged to Hopsworks (v{xgb_meta.version})")
+
+# --- XGBoost ---
 xgb_meta = mr.python.create_model(
     name="xgb_aqi_model",
     description="XGBoost AQI model with time-series CV and early stopping",
-    metrics=metrics_xgb,
-    model_schema=model_schema,
+    metrics={
+        "rmse": float(metrics_xgb["rmse"]),
+        "mae": float(metrics_xgb["mae"]),
+        "r2": float(metrics_xgb["r2"])
+    },
+    model_schema=model_schema
 )
 xgb_meta.save("artifacts/xgb_model.pkl")
 print(f"✅ XGBoost logged to Hopsworks (v{xgb_meta.version})")
 
-# --- Log Ridge Regression ---
+# # --- Log Ridge Regression ---
+# ridge_meta = mr.python.create_model(
+#     name="ridge_aqi_model",
+#     description="Ridge Regression baseline model for AQI prediction",
+#     metrics=metrics_ridge,
+#     model_schema=model_schema,
+# )
+# ridge_meta.save("artifacts/ridge_model.pkl")
+# print(f"✅ Ridge Regression logged to Hopsworks (v{ridge_meta.version})")
+
+# --- Ridge Regression ---
 ridge_meta = mr.python.create_model(
     name="ridge_aqi_model",
     description="Ridge Regression baseline model for AQI prediction",
-    metrics=metrics_ridge,
-    model_schema=model_schema,
+    metrics={
+        "rmse": float(metrics_ridge["rmse"]),
+        "mae": float(metrics_ridge["mae"]),
+        "r2": float(metrics_ridge["r2"])
+    },
+    model_schema=model_schema
 )
 ridge_meta.save("artifacts/ridge_model.pkl")
 print(f"✅ Ridge Regression logged to Hopsworks (v{ridge_meta.version})")
 
-# --- Log LSTM ---
+# # --- Log LSTM ---
+# lstm_meta = mr.python.create_model(
+#     name="lstm_aqi_model",
+#     description="LSTM deep learning model for sequential AQI forecasting",
+#     metrics=metrics_lstm,
+#     model_schema=model_schema,
+# )
+# lstm_meta.save("artifacts/lstm_model.h5")
+# print(f"✅ LSTM Model logged to Hopsworks (v{lstm_meta.version})")
+
+# --- LSTM ---
 lstm_meta = mr.python.create_model(
     name="lstm_aqi_model",
     description="LSTM deep learning model for sequential AQI forecasting",
-    metrics=metrics_lstm,
-    model_schema=model_schema,
+    metrics={
+        "rmse": float(metrics_lstm["rmse"]),
+        "mae": float(metrics_lstm["mae"]),
+        "r2": float(metrics_lstm["r2"])
+    },
+    model_schema=model_schema
 )
+# Save LSTM in Keras recommended format
 lstm_meta.save("artifacts/lstm_model.h5")
-print(f"✅ LSTM Model logged to Hopsworks (v{lstm_meta.version})")
-
+print(f"✅ LSTM logged to Hopsworks (v{lstm_meta.version})")
 # ==============================================
 # 📊 Final Summary of All Models
 # ==============================================
 print("\n==================== 🧠 FINAL MODEL PERFORMANCE SUMMARY ====================")
-print(f"XGBoost  → RMSE: {bundle['metrics']['test_rmse']:.3f}, MAE: {bundle['metrics']['test_mae']:.3f}, R²: {bundle['metrics']['test_r2']:.3f}")
-print(f"Ridge    → RMSE: {ridge_metrics['rmse']:.3f}, MAE: {ridge_metrics['mae']:.3f}, R²: {ridge_metrics['r2']:.3f}")
-print(f"LSTM     → RMSE: {lstm_rmse:.3f}, MAE: {lstm_mae:.3f}, R²: {lstm_r2:.3f}")
+print(f"XGBoost  → RMSE: {metrics_xgb['rmse']:.3f}, MAE: {metrics_xgb['mae']:.3f}, R²: {metrics_xgb['r2']:.3f}")
+print(f"Ridge    → RMSE: {metrics_ridge['rmse']:.3f}, MAE: {metrics_ridge['mae']:.3f}, R²: {metrics_ridge['r2']:.3f}")
+print(f"LSTM     → RMSE: {metrics_lstm['rmse']:.3f}, MAE: {metrics_lstm['mae']:.3f}, R²: {metrics_lstm['r2']:.3f}")
 try:
     print(f"RandomForest → RMSE: {rf_rmse:.3f}, MAE: {rf_mae:.3f}, R²: {rf_r2:.3f}")
 except NameError:
     print("RandomForest → Not Trained in this run")
 print("===========================================================================")
 
+
 print("\n🎉 Training pipeline completed successfully!")
+
+print("XGB metrics stored:", metrics_xgb)
+print("Ridge metrics stored:", metrics_ridge)
+print("LSTM metrics stored:", metrics_lstm)
+
+
+
+for name in ["xgb_aqi_model", "ridge_aqi_model", "lstm_aqi_model"]:
+    model_entry = mr.get_model(name)             # gets latest version entry
+    version_number = model_entry.version
+    version_obj = mr.get_model(name, version=version_number)
+
+    metrics = getattr(version_obj, "training_metrics", None)
+    print(f"{name} latest version: {version_number}, metrics: {metrics}")
