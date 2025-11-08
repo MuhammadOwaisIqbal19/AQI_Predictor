@@ -336,7 +336,9 @@ with tab2:
 
     if st.button("Generate 3-Day Forecast"):
         try:
-            res = requests.post(f"{API_URL}/forecast_3day", json=input_data)
+            # Old (wrong)
+            # response = requests.post(f"{API_URL}/forecast_3day", json=payload)
+            res = requests.post(f"{API_URL}/forecast_72hr", json=input_data)
             if res.status_code == 200:
                 data = res.json()
                 forecast = data["forecast"]
