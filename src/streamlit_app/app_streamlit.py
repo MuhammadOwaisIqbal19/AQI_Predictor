@@ -357,8 +357,14 @@ with tab2:
                     st.success(f"🧠 Forecast generated successfully using: `{model_used}` (v{version}) | R² = {r2:.3f}")
                 else:
                     st.success(f"🧠 Forecast generated successfully using: `{model_used}` (v{version}) | R² = N/A")    
-
-                fig = px.bar(df, x="date", y="predicted_AQI", color="predicted_AQI",
+                # Use correct column name (check your actual JSON keys)
+                #df ko forecast_df kia hhai
+        
+                x_col = 'timestamp' if 'timestamp' in forecast_df.columns else 'date'
+                # fig = px.bar(df, x="date", y="predicted_AQI", color="predicted_AQI",
+                #              color_continuous_scale="YlOrRd",
+                #              title="Predicted AQI for Next 3 Days")
+                fig = px.bar(df, x=x_col, y="predicted_AQI", color="predicted_AQI",
                              color_continuous_scale="YlOrRd",
                              title="Predicted AQI for Next 3 Days")
                 fig.update_layout(xaxis_title="Date", yaxis_title="Predicted AQI", title_x=0.5)
