@@ -213,7 +213,7 @@ def predict_today():
     """
     try:
         # ✅ Read last record from the latest processed data
-        fg = fs.get_feature_group("aqi_hourly_features", version=2)
+        fg = fs.get_feature_group("aqi_hourly_features", version=4)
         df = fg.read().sort_values("timestamp").reset_index(drop=True)
         last_row = df.iloc[[-1]].copy()
 
@@ -247,7 +247,7 @@ def predict_today():
 @app.get("/forecast_3day")
 def forecast_next_3_days_autoregressive():
     # Load last row of processed data as base
-    fg = fs.get_feature_group("aqi_hourly_features", version=2)
+    fg = fs.get_feature_group("aqi_hourly_features", version=4)
     df = fg.read().sort_values("timestamp").reset_index(drop=True)
     last_row = df.iloc[[-1]].copy()  # DataFrame
     timestamp = last_row['timestamp'].values[0]

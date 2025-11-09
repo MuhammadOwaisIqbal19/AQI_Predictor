@@ -123,7 +123,7 @@ if "AQI" in final_df.columns:
 # --- Create a new feature group without relative_humidity_2m ---
 processed_fg = fs.get_or_create_feature_group(
     name="aqi_hourly_features",
-    version=2,  # new version
+    version=4,  # new version
     primary_key=["timestamp"],
     description="Processed and engineered hourly features without relative_humidity_2m"
 )

@@ -32,7 +32,7 @@ project = hopsworks.login(api_key_value=api_key, project=project_name)
 fs = project.get_feature_store()
 mr = project.get_model_registry()
 
-fg = fs.get_feature_group("aqi_hourly_features", version=2)
+fg = fs.get_feature_group("aqi_hourly_features", version=4)
 df = fg.read()
 
 print("✅ Data loaded from Hopsworks Feature Store!")
