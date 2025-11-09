@@ -113,6 +113,7 @@ if best_model_type == "lstm":
     model = load_model(model_file)
     # LSTM features (already defined in your code)
     features = [
+        'relative_humidity_2m',
         'pm10', 'pm2_5', 'ozone', 'nitrogen_dioxide',
         'season_spring', 'season_summer', 'season_winter',
         'hour_sin', 'hour_cos',
