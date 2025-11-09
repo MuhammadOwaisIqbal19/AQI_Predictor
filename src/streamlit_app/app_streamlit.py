@@ -46,52 +46,6 @@ input_data = {
 
 tab1, tab2 = st.tabs(["📍 Current AQI", "📈 3-Day Forecast"])
 
-# ==============================================
-# 📍 Single AQI Prediction
-# ==============================================
-# with tab1:
-#     st.subheader("📍 Current AQI Prediction")
-
-#     if st.button("Predict AQI"):
-#         try:
-#             res = requests.post(f"{API_URL}/predict", json=input_data)
-#             if res.status_code == 200:
-#                 result = res.json()
-#                 aqi = result["predicted_AQI"]
-#                 model_used = result.get("model_used", "unknown")
-#                 r2 = result.get("r2", None)
-
-#                 st.success(f"Predicted AQI: **{aqi:.2f}**")
-#                 if r2 is not None:
-#                     st.info(f"🧠 Model Used: `{model_used}` | R² = {r2:.3f}")
-#                 else:
-#                     st.info(f"🧠 Model Used: `{model_used}` | R² = N/A")
-    
-#                 # st.info(f"🧠 Model Used: `{model_used}` | R² = {r2:.3f}")
-
-#                 # AQI category visualization
-#                 if aqi <= 50:
-#                     color, label = "#00E400", "Good"
-#                 elif aqi <= 100:
-#                     color, label = "#FFFF00", "Moderate"
-#                 elif aqi <= 150:
-#                     color, label = "#FF7E00", "Unhealthy (Sensitive)"
-#                 elif aqi <= 200:
-#                     color, label = "#FF0000", "Unhealthy"
-#                 elif aqi <= 300:
-#                     color, label = "#99004C", "Very Unhealthy"
-#                 else:
-#                     color, label = "#7E0023", "Hazardous"
-
-#                 st.markdown(
-#                     f"<div style='background-color:{color};padding:15px;border-radius:10px;"
-#                     f"text-align:center;color:white;font-size:20px;'>AQI = {aqi:.2f} ({label})</div>",
-#                     unsafe_allow_html=True
-#                 )
-#             else:
-#                 st.error(f"❌ API Error: {res.text}")
-#         except Exception as e:
-#             st.error(f"⚠️ Could not connect to API: {e}")
 
 with tab1:
     st.subheader("📍 Current AQI Prediction")
@@ -154,6 +108,7 @@ with tab2:
             res = requests.get(f"{API_URL}/forecast_3day")
             if res.status_code == 200:
                 data = res.json()
+                forecast = data.get("forecast") or data.get("forecast_next_3_days_autoregressive")
                 forecast = data["forecast"]
                 model_used = data.get("model_used", "unknown")
                 version = data.get("model_version", "N/A")
