@@ -51,7 +51,7 @@ raw_df['AQI'] = raw_df[['pm25_sub', 'pm10_sub', 'no2_sub', 'so2_sub', 'co_sub', 
 
 # --- (3) Feature engineering ---
 df = raw_df.copy()
-df = df.drop(['relative_humidity_2m','sulphur_dioxide', 'carbon_monoxide'], axis=1)
+df = df.drop(['sulphur_dioxide', 'carbon_monoxide'], axis=1)
 
 # extract time features
 df['timestamp'] = pd.to_datetime(df['timestamp'])
@@ -86,8 +86,8 @@ df = pd.get_dummies(df, columns=['day_of_week'], prefix='dow')
 # scale numeric
 scaler = RobustScaler()
 # dropping relative humididty
-# numeric = ['relative_humidity_2m','pm10','pm2_5','ozone','nitrogen_dioxide']
-numeric = ['pm10','pm2_5','ozone','nitrogen_dioxide']
+numeric = ['relative_humidity_2m','pm10','pm2_5','ozone','nitrogen_dioxide']
+# numeric = ['pm10','pm2_5','ozone','nitrogen_dioxide']
 df[numeric] = scaler.fit_transform(df[numeric])
 
 # select final features

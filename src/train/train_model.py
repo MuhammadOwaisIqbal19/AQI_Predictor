@@ -43,19 +43,19 @@ print("Shape:", df.shape)
 # ==============================================
 df = df.sort_values("timestamp").reset_index(drop=True)
 
-# features = [
-#     'relative_humidity_2m', 'pm10', 'pm2_5', 'ozone', 'nitrogen_dioxide',
-#     'season_spring', 'season_summer', 'season_winter',
-#     'hour_sin', 'hour_cos',
-#     'dow_0', 'dow_1', 'dow_2', 'dow_3', 'dow_4', 'dow_5', 'dow_6'
-# ]
-# without relative humidity
 features = [
-    'pm10', 'pm2_5', 'ozone', 'nitrogen_dioxide',
+    'relative_humidity_2m', 'pm10', 'pm2_5', 'ozone', 'nitrogen_dioxide',
     'season_spring', 'season_summer', 'season_winter',
     'hour_sin', 'hour_cos',
     'dow_0', 'dow_1', 'dow_2', 'dow_3', 'dow_4', 'dow_5', 'dow_6'
 ]
+# without relative humidity
+# features = [
+#     'pm10', 'pm2_5', 'ozone', 'nitrogen_dioxide',
+#     'season_spring', 'season_summer', 'season_winter',
+#     'hour_sin', 'hour_cos',
+#     'dow_0', 'dow_1', 'dow_2', 'dow_3', 'dow_4', 'dow_5', 'dow_6'
+# ]
 target = 'aqi'
 
 X = df[features]
