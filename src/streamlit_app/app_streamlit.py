@@ -24,7 +24,7 @@ powered by **XGBoost, Ridge Regression, or LSTM** — whichever performs best (h
 # ==============================================
 st.sidebar.header("🌦️ Input Parameters")
 
-# humidity = st.sidebar.slider("Relative Humidity (%)", 0, 100, 60)
+humidity = st.sidebar.slider("Relative Humidity (%)", 0, 100, 60)
 pm10 = st.sidebar.number_input("PM10 (μg/m³)", 0, 500, 40)
 pm25 = st.sidebar.number_input("PM2.5 (μg/m³)", 0, 500, 25)
 ozone = st.sidebar.number_input("Ozone (μg/m³)", 0, 1000, 35)
