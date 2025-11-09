@@ -252,23 +252,57 @@ def root():
 #         "model_used": best_model_name,
 #         "r2": best_r2
 #     }
-@app.get("/predict")
-def predict_today():
+# @app.get("/predict")
+# def predict_today():
+#     """
+#     Predicts today's AQI using the latest available record 
+#     from the processed feature group (aqi_hourly_features v3).
+#     """
+#     try:
+#         # ✅ Fetch feature group and get the latest data point
+#         fg = fs.get_feature_group("aqi_hourly_features", version=3)
+#         df = fg.read().sort_values("timestamp").reset_index(drop=True)
+#         last_row = df.iloc[[-1]]  # DataFrame with one row
+
+#         # ✅ Align columns with model features
+#         valid_features = [f for f in features if f in last_row.columns]
+#         X = last_row[valid_features]
+
+#         # ✅ Predict using the trained model
+#         if best_model_type == "lstm":
+#             X_scaled = lstm_scaler.transform(X)
+#             X_reshaped = np.expand_dims(X_scaled, axis=0)
+#             pred = model.predict(X_reshaped)[0][0]
+#         else:
+#             pred = model.predict(X)[0]
+
+#         # ✅ Return clean, clear response
+#         return {
+#             "predicted_AQI_today": float(pred),
+#             "timestamp_used": str(last_row["timestamp"].values[0]),
+#             "model_used": best_model_name,
+#             "r2": best_r2
+#         }
+
+#     except Exception as e:
+#         return {"error": str(e)}
+
+from fastapi import Request
+
+@app.api_route("/predict", methods=["GET", "POST"])
+def predict_today(request: Request):
     """
-    Predicts today's AQI using the latest available record 
-    from the processed feature group (aqi_hourly_features v3).
+    Predict today's AQI using latest processed row.
+    Accepts GET (no body) or POST (body ignored here).
     """
     try:
-        # ✅ Fetch feature group and get the latest data point
         fg = fs.get_feature_group("aqi_hourly_features", version=3)
         df = fg.read().sort_values("timestamp").reset_index(drop=True)
-        last_row = df.iloc[[-1]]  # DataFrame with one row
+        last_row = df.iloc[[-1]].copy()
 
-        # ✅ Align columns with model features
         valid_features = [f for f in features if f in last_row.columns]
         X = last_row[valid_features]
 
-        # ✅ Predict using the trained model
         if best_model_type == "lstm":
             X_scaled = lstm_scaler.transform(X)
             X_reshaped = np.expand_dims(X_scaled, axis=0)
@@ -276,14 +310,12 @@ def predict_today():
         else:
             pred = model.predict(X)[0]
 
-        # ✅ Return clean, clear response
         return {
-            "predicted_AQI_today": float(pred),
-            "timestamp_used": str(last_row["timestamp"].values[0]),
+            "predicted_AQI": float(pred),
+            "date": str(last_row["timestamp"].values[0]),
             "model_used": best_model_name,
             "r2": best_r2
         }
-
     except Exception as e:
         return {"error": str(e)}
 
