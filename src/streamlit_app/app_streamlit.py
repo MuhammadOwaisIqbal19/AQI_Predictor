@@ -438,12 +438,19 @@ if st.button("Predict AQI"):
         if response.status_code == 200:
             data = response.json()
             prediction = data.get("prediction")
+            model_used = data.get("model_used", "unknown")
+            r2 = data.get("r2", "N/A")
+
 
             if prediction is not None:
                 st.success(f"🌤️ Predicted AQI: **{prediction:.2f}**")
-                st.caption(f"Model used: {data.get('model_name', 'unknown')} (v{data.get('version', 'N/A')}) | R² = {data.get('r2', 'N/A')}")
+                if isinstance(r2, (int, float)):
+                    st.info(f"🧠 Model Used: {model_used} | R² = {r2:.3f}")
             else:
+                st.info(f"🧠 Model Used: {model_used} | R² = N/A")
                 st.error("⚠️ API returned no prediction value.")
+    
+             
         else:
             st.error(f"❌ API Error: {response.text}")
     except Exception as e:
