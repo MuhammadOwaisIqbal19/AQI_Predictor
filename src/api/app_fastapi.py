@@ -227,19 +227,87 @@ def predict(request: AQIRequest):
     }
 
 # ==============================================================
-# 9️⃣ Predict Next 3 Days AQI (Non-Autoregressive)
+# 9️⃣ Predict Next 3 Days AQI (Non-Autoregressive) ---  having user input
 # ==============================================================
-@app.post("/forecast_3day")
-def forecast_3day(request: AQIRequest):
-    base_features = preprocess_input(request)
-    now = datetime.utcnow()
-    forecasts = []
+# @app.post("/forecast_3day")
+# def forecast_3day(request: AQIRequest):
+#     base_features = preprocess_input(request)
+#     now = datetime.utcnow()
+#     forecasts = []
 
+#     for i in range(1, 4):
+#         future = now + timedelta(days=i)
+#         fdict = base_features.copy()
+
+#         # Update temporal encodings for future day
+#         fdict["hour_sin"] = np.sin(2 * np.pi * future.hour / 24)
+#         fdict["hour_cos"] = np.cos(2 * np.pi * future.hour / 24)
+#         dow = future.weekday()
+#         for d in range(7):
+#             fdict[f"dow_{d}"] = 1 if d == dow else 0
+#         month = future.month
+#         fdict["season_spring"] = 1 if month in [3, 4, 5] else 0
+#         fdict["season_summer"] = 1 if month in [6, 7, 8] else 0
+#         fdict["season_winter"] = 1 if month in [12, 1, 2] else 0
+
+#         # df_future = pd.DataFrame([fdict])[features]
+#         df_future = pd.DataFrame([fdict])
+#         df_future = df_future[[f for f in features if f in df_future.columns]]  # <-- filter
+
+
+#         if best_model_type == "lstm":
+#             scaler = MinMaxScaler()
+#             # X_scaled = scaler.fit_transform(df_future)
+#             X_scaled = lstm_scaler.transform(df_future)  # ✅ use saved scaler
+#             X_reshaped = np.expand_dims(X_scaled, axis=0)
+#             pred = model.predict(X_reshaped)[0][0]
+#         else:
+#             pred = model.predict(df_future)[0]
+
+#         forecasts.append({
+#             "day": f"Day {i}",
+#             "date": future.strftime("%Y-%m-%d"),
+#             "predicted_AQI": float(pred)
+#         })
+
+#     return {
+#         "forecast": forecasts,
+#         "model_used": best_model_name,
+#         "model_version": best_model_meta.version,
+#         "best_r2": best_r2
+#     }
+    # return {
+    # "forecast": forecast_df.to_dict(orient="records"),
+    # "model_used": best_model.name if best_model else "unknown",
+    # "version": best_model.version if best_model else "N/A",
+    # "r2": best_r2 if best_r2 is not None else "N/A"
+# }
+
+# without user input
+# ============================================================== 
+# 9️⃣ Predict Next 3 Days AQI (Data-driven, no user input)
+# ============================================================== 
+@app.post("/forecast_3day")
+def forecast_3day():
+    # 1️⃣ Load processed dataset used for training
+    fg = fs.get_feature_group("aqi_hourly_features", version=3)
+    df = fg.read().sort_values("timestamp").reset_index(drop=True)
+
+    # Ensure all features for prediction
+    df_features = df[features].copy()
+    
+    forecasts = []
+    
+    # 2️⃣ Take last row as base input
+    last_row = df_features.iloc[-1].to_dict()
+    
+    now = datetime.utcnow()
+    
     for i in range(1, 4):
         future = now + timedelta(days=i)
-        fdict = base_features.copy()
+        fdict = last_row.copy()
 
-        # Update temporal encodings for future day
+        # Update temporal features: hour, day-of-week, season
         fdict["hour_sin"] = np.sin(2 * np.pi * future.hour / 24)
         fdict["hour_cos"] = np.cos(2 * np.pi * future.hour / 24)
         dow = future.weekday()
@@ -250,20 +318,21 @@ def forecast_3day(request: AQIRequest):
         fdict["season_summer"] = 1 if month in [6, 7, 8] else 0
         fdict["season_winter"] = 1 if month in [12, 1, 2] else 0
 
-        # df_future = pd.DataFrame([fdict])[features]
         df_future = pd.DataFrame([fdict])
-        df_future = df_future[[f for f in features if f in df_future.columns]]  # <-- filter
+        df_future = df_future[[f for f in features if f in df_future.columns]]
 
-
+        # 3️⃣ Predict using the best model
         if best_model_type == "lstm":
-            scaler = MinMaxScaler()
-            # X_scaled = scaler.fit_transform(df_future)
-            X_scaled = lstm_scaler.transform(df_future)  # ✅ use saved scaler
+            X_scaled = lstm_scaler.transform(df_future)
             X_reshaped = np.expand_dims(X_scaled, axis=0)
             pred = model.predict(X_reshaped)[0][0]
+            
+            # Update last_row sequence with predicted value if needed
+            last_row.update(fdict)  # keep features consistent
         else:
             pred = model.predict(df_future)[0]
-
+            # For next day, keep last_row as base (non-autoregressive)
+        
         forecasts.append({
             "day": f"Day {i}",
             "date": future.strftime("%Y-%m-%d"),
@@ -276,10 +345,3 @@ def forecast_3day(request: AQIRequest):
         "model_version": best_model_meta.version,
         "best_r2": best_r2
     }
-    # return {
-    # "forecast": forecast_df.to_dict(orient="records"),
-    # "model_used": best_model.name if best_model else "unknown",
-    # "version": best_model.version if best_model else "N/A",
-    # "r2": best_r2 if best_r2 is not None else "N/A"
-# }
-
