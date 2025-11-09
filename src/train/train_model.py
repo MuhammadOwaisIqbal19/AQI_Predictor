@@ -148,6 +148,7 @@ print("\n🧠 Training LSTM Model (for sequential learning)...")
 scaler = MinMaxScaler()
 X_scaled = scaler.fit_transform(X)
 y_scaled = scaler.fit_transform(y.values.reshape(-1, 1))
+joblib.dump(scaler, "artifacts/lstm_scaler.pkl")  # save scaler
 
 # Create sequences (e.g., 24 hours = 1 day window)
 window_size = 24

@@ -212,7 +212,8 @@ def predict(request: AQIRequest):
 
     if best_model_type == "lstm":
         scaler = MinMaxScaler()
-        X_scaled = scaler.fit_transform(df)
+        X_scaled = lstm_scaler.transform(df)  # ✅ use sa
+        # X_scaled = scaler.fit_transform(df)
         X_reshaped = np.expand_dims(X_scaled, axis=0)
         pred = model.predict(X_reshaped)[0][0]
     else:
@@ -255,7 +256,8 @@ def forecast_3day(request: AQIRequest):
 
         if best_model_type == "lstm":
             scaler = MinMaxScaler()
-            X_scaled = scaler.fit_transform(df_future)
+            # X_scaled = scaler.fit_transform(df_future)
+            X_scaled = lstm_scaler.transform(df_future)  # ✅ use saved scaler
             X_reshaped = np.expand_dims(X_scaled, axis=0)
             pred = model.predict(X_reshaped)[0][0]
         else:
