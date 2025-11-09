@@ -457,6 +457,7 @@ def forecast_next_3_days_autoregressive():
     fg = fs.get_feature_group("aqi_hourly_features", version=2)
     df = fg.read().sort_values("timestamp").reset_index(drop=True)
     last_row = df.iloc[[-1]].copy()  # DataFrame
+    timestamp = last_row['timestamp'].values[0]
 
     # Keep only model features
     last_row = last_row[[f for f in features if f in last_row.columns]]
