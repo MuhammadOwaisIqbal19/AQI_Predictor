@@ -70,17 +70,6 @@ for name in model_names:
                     "xgb"
                 )      
         
-        # if metrics and "r2" in metrics:
-        #     r2 = metrics["r2"]
-        #     if r2 > best_r2:
-        #         best_r2 = r2
-        #         best_model_meta = model_version
-        #         best_model_name = name
-        #         best_model_type = (
-        #             "lstm" if "lstm" in name else
-        #             "ridge" if "ridge" in name else
-        #             "xgb"
-        #         )
         else:
              print(f"⚠️ Model {name} v{version_number} has no R² metric")
     except Exception as e:
@@ -292,13 +281,6 @@ def forecast_next_3_days_autoregressive():
             "predicted_AQI": float(pred)
         })
 
-        # Update current_input for next day (autoregressive)
-        # Replace pollutant/humidity features with predicted AQI if you want
-        # Here, we assume AQI influences next step input
-        # If your model uses only pollutant data, you may need external forecast or keep constant
-        # Example: keep same pollutants but update AQI feature if exists
-        # Since your current features do not include AQI itself, we just propagate the last row for next step
-        current_input = df_future.copy()
 
     return {
         "forecast_next_3_days_autoregressive": forecasts,

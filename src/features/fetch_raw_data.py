@@ -15,7 +15,7 @@ from retry_requests import retry
 # ============ FETCH RAW WEATHER + POLLUTION DATA ============
 def fetch_raw_data():
     LAT, LON = 31.558, 74.3507
-    START, END = "2024-05-01", "2025-11-03"
+    START, END = "2024-05-01", "2025-11-09"
     TIMEZONE = "Asia/Karachi"
 
     weather_vars = ["relative_humidity_2m"]
